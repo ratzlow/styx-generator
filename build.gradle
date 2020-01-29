@@ -1,0 +1,19 @@
+//------------------------------------------------------------------------------
+// Extending the current project build by integrating code generation logic
+// into gradle life cycle - without an external plugin.
+//
+// see: https://docs.gradle.org/current/userguide/organizing_gradle_projects.html
+// https://docs.gradle.org/current/userguide/custom_tasks.html
+//------------------------------------------------------------------------------
+
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+}
+
+tasks.register("generateSources", CodeGenTask.class) {
+    description = "Generate Java src from FIX dictionary"
+    packageName = "net.styx.model.v2"
+    targetDir = "./target/generated-sources/java"
+}
