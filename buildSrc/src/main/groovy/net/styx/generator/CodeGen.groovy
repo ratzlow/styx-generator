@@ -33,7 +33,7 @@ class CodeGen {
         InputStream is = CodeGen.class.getResourceAsStream("/FIX50.xml")
         def fix = new XmlParser().parse(is as InputStream)
 
-        // parse structures
+        log.info("Start parsing dictionaries ...")
         def symbolTable = [:]
         fix.fields.field
                 .collect { Node node -> new Field(node, symbolTable) }
@@ -44,10 +44,6 @@ class CodeGen {
         fix.messages.message
                 .collect { Node node -> new Message(node, symbolTable) }
 
-
-        log.info("Parsed fix dictionary! sample=" + symbolTable.get("AllocAckGrp"))
-
-        //--------------write files----
         log.info("Start writing files to $generateTarget ...")
         cleanDir()
         Symbol s_1 = symbolTable.get("NewOrderSingle") as Symbol
@@ -74,12 +70,11 @@ class CodeGen {
             generators.put(symbol.name, new ClassGen(packageName, symbol.name, symbol.getAttributes()))
         }
 
-        log.info("Adding symbol $symbol.name")
+        log.debug("Adding symbol $symbol.name")
 
         assert symbol.attributes.every {it != null} : symbol
         symbol.attributes.forEach{ Symbol sym -> flatten(sym, generators) }
     }
-
 
     private void cleanDir() {
         log.info("Cleanup target generation dir")
@@ -93,14 +88,14 @@ class CodeGen {
         }
     }
 
-
     private void writeFile(String generatedCode, String fileName) {
         log.info("---------------------------------------------------------------------")
-        log.info(generatedCode)
-        def outFile = new File("${fullPath()}/${fileName}.java")
+        def fqFileName = "${fullPath()}/${fileName}.java"
+        log.info("Write to File: $fqFileName")
+        def outFile = new File(fqFileName)
         outFile.append(generatedCode, StandardCharsets.UTF_8.toString())
+        log.debug(generatedCode)
     }
-
 
     private String fullPath() { "$generateTarget/" + packageName.toString().replace(".", "/") }
 }

@@ -1,5 +1,8 @@
 package net.styx.generator.parse
 
+/**
+ * Field is a value configured in complex types. It is mapped to specific target language types.
+ */
 class Field extends Symbol {
 
     // FIX dict mapping
@@ -46,7 +49,12 @@ class Field extends Symbol {
         "${name}{type=$type" + (!literals.isEmpty() ? " literals=${literals}}" : "}")
     }
 
-    static class TypeResolver {
+
+    //------------------------------------------------------------------------------------------------------------------
+    // inner classes to associate types with Fields
+    //------------------------------------------------------------------------------------------------------------------
+
+    private static class TypeResolver {
         Set<String> sourceTypes
         String targetType
         Optional<String> fqTargetClassName
@@ -68,7 +76,7 @@ class Field extends Symbol {
         }
     }
 
-    static class Types {
+    private static class Types {
         Set<TypeResolver> typeMappings
 
         Types(Collection<TypeResolver> typeMappings) {
@@ -82,11 +90,10 @@ class Field extends Symbol {
         }
     }
 
-
     /**
      * Some fields are enums having list of literals
      */
-    static class Literal {
+    private static class Literal {
         def code, description
 
         Literal(Node node) {
