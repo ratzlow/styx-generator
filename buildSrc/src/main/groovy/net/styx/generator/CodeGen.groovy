@@ -29,33 +29,45 @@ class CodeGen {
 
     def generateTarget = new File("./target/generated-sources/java")
 
+    def dictNames = ["/FIX50.xml", "/DomainModel-FIX50.xml"]
+
     def start() {
-        InputStream is = CodeGen.class.getResourceAsStream("/FIX50.xml")
-        def fix = new XmlParser().parse(is as InputStream)
-
-        log.info("Start parsing dictionaries ...")
-        def symbolTable = [:]
-        fix.fields.field
-                .collect { Node node -> new Field(node, symbolTable) }
-
-        fix.components.component
-                .collect { Node node -> new Component(node, symbolTable) }
-
-        fix.messages.message
-                .collect { Node node -> new Message(node, symbolTable) }
+        def symbolTable = parseDictionaries(dictNames)
 
         log.info("Start writing files to $generateTarget ...")
         cleanDir()
-        Symbol s_1 = symbolTable.get("NewOrderSingle") as Symbol
+        Symbol s_1 = symbolTable.get("Order") as Symbol
         Map<String, Generator> generators = [:]
         flatten(s_1, generators)
         generators.collect {it.value}.each {writeFile(it.generate(), it.fileName())}
         log.info("Finished code generation!")
     }
 
+
     //---------------------------------------------------------------------------
     // internal implementation
     //---------------------------------------------------------------------------
+
+    private Map parseDictionaries(List<String> dictionaryNames) {
+        def symbolTable = [:]
+
+        for (String dictName : dictionaryNames) {
+            log.info("Parsing dictionary $dictName ...")
+            InputStream is = CodeGen.class.getResourceAsStream(dictName)
+            def fix = new XmlParser().parse(is as InputStream)
+
+            fix.fields.field
+                    .collect { Node node -> new Field(node, symbolTable) }
+
+            fix.components.component
+                    .collect { Node node -> new Component(node, symbolTable) }
+
+            fix.messages.message
+                    .collect { Node node -> new Message(node, symbolTable) }
+        }
+
+        symbolTable
+    }
 
     private void flatten(Symbol symbol, Map<String, Generator> generators) {
         assert symbol != null

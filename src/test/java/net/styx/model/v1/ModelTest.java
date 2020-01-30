@@ -10,10 +10,13 @@ public class ModelTest {
 
     @Test
     void testPropertyTypes() {
-        NewOrderSingle msg = new NewOrderSingle();
-        assertIterableEquals(Collections.emptyList(), msg.getPreAllocGrp());
-        PreAllocGrp p = new PreAllocGrp();
-        msg.getPreAllocGrp().add(p);
-        assertSame(p, msg.getPreAllocGrp().iterator().next());
+        Order msg = new Order();
+        assertIterableEquals(Collections.emptyList(), msg.getStrategyParametersGrp());
+        StrategyParametersGrp group = new StrategyParametersGrp();
+        group.setStrategyParameterName("Frank");
+        group.setStrategyParameterType(StrategyParameterType.PRICE);
+        group.setStrategyParameterValue("87.9");
+        msg.getStrategyParametersGrp().add(group);
+        assertSame(group, msg.getStrategyParametersGrp().iterator().next());
     }
 }
