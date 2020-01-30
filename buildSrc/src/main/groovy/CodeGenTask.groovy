@@ -11,7 +11,7 @@ class CodeGenTask extends DefaultTask {
     def packageName = "net.styx.model.v1"
 
 
-    @Option(option = "targetDir", description = "file system directory where the soures will be generated to")
+    @Option(option = "targetDir", description = "file system directory where the sources will be generated to")
     @Input
     def targetDir = "./target/generated-sources/java"
 

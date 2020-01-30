@@ -1,5 +1,6 @@
 package net.styx.generator.render
 
+
 import net.styx.generator.parse.Field
 import net.styx.generator.parse.Symbol
 
@@ -12,7 +13,7 @@ class ClassGen implements Generator {
         this.pkgName = pkgName
         this.className = className
         this.attributes = attributes
-        this.importFqClassNames = attributes.any{it.type == "component" && it.collectionItem} ? ["java.util.Collection"] : []
+        this.importFqClassNames = attributes.any { it.type == "component" && it.collectionItem } ? ["java.util.Collection"] : []
     }
 
     @Override
@@ -21,7 +22,7 @@ class ClassGen implements Generator {
     @Override
     String generate() {
 //------------------------------Template:class file----------------
-"""package $pkgName;
+        """package $pkgName;
 
 ${imports()}
 
@@ -41,7 +42,7 @@ ${gettersAndSetters()}
 
         attributes.collect { attribute ->
 //------------------------------Template:get/set methods----------
-"""
+            """
     
     public ${resolveJavaType(attribute)} get$attribute.name() {
         return $attribute.attributeName;
@@ -63,17 +64,22 @@ ${gettersAndSetters()}
                 .collect { Field field -> field.getFqClassName().get() }
                 .toSet()
 
-        if (attributes.any {it.isCollectionItem()}) {
+        if (attributes.any { it.isCollectionItem() }) {
             importFqClassNames << "java.util.Collection"
+            importFqClassNames << "java.util.ArrayList"
         }
 
-        new TreeSet<>(importFqClassNames).collect{ "import $it;\n"}.join()
+        new TreeSet<>(importFqClassNames).collect { "import $it;\n" }.join()
     }
 
     private String attributeDeclaration() {
-        attributes
-                .collect{ symbol -> resolveJavaType(symbol) + " " + symbol.attributeName }
-                .collect{ "    private $it;\n"}.join()
+        def declarations = []
+        for (Symbol attribute : attributes) {
+            def javaType = resolveJavaType(attribute)
+            def assignment = attribute.isCollectionItem() ? " = new ArrayList<>()" : ""
+            declarations << "    private $javaType ${attribute.attributeName}${assignment};\n"
+        }
+        declarations.join()
     }
 
     private String resolveJavaType(Symbol attribute) {

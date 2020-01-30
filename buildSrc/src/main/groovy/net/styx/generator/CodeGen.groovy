@@ -1,5 +1,6 @@
 package net.styx.generator
 
+import groovy.util.logging.Slf4j
 import net.styx.generator.parse.Component
 import net.styx.generator.parse.Field
 import net.styx.generator.parse.Message
@@ -10,13 +11,14 @@ import net.styx.generator.render.Generator
 
 import java.nio.charset.StandardCharsets
 
+@Slf4j
 class CodeGen {
 
     static void main(String[] args) {
-        println("Start code generation ...")
+        log.info("Start code generation ...")
         CodeGen gen = new CodeGen()
         gen.start()
-        println("Finished generation. Look at ${gen.generateTarget}")
+        log.info("Finished generation. Look at ${gen.generateTarget}")
     }
 
     //---------------------------------------------------------------------------
@@ -43,16 +45,16 @@ class CodeGen {
                 .collect { Node node -> new Message(node, symbolTable) }
 
 
-        println("Parsed fix dictionary! sample=" + symbolTable.get("AllocAckGrp").toString())
+        log.info("Parsed fix dictionary! sample=" + symbolTable.get("AllocAckGrp"))
 
         //--------------write files----
-        println("Start writing files to $generateTarget ...")
+        log.info("Start writing files to $generateTarget ...")
         cleanDir()
         Symbol s_1 = symbolTable.get("NewOrderSingle") as Symbol
         Map<String, Generator> generators = [:]
         flatten(s_1, generators)
         generators.collect {it.value}.each {writeFile(it.generate(), it.fileName())}
-        println("Finished code generation!")
+        log.info("Finished code generation!")
     }
 
     //---------------------------------------------------------------------------
@@ -72,7 +74,7 @@ class CodeGen {
             generators.put(symbol.name, new ClassGen(packageName, symbol.name, symbol.getAttributes()))
         }
 
-        println("Adding symbol $symbol.name")
+        log.info("Adding symbol $symbol.name")
 
         assert symbol.attributes.every {it != null} : symbol
         symbol.attributes.forEach{ Symbol sym -> flatten(sym, generators) }
@@ -80,7 +82,7 @@ class CodeGen {
 
 
     private void cleanDir() {
-        println("Cleanup target generation dir")
+        log.info("Cleanup target generation dir")
         if (generateTarget.exists()) {
             generateTarget.deleteDir()
         }
@@ -93,8 +95,8 @@ class CodeGen {
 
 
     private void writeFile(String generatedCode, String fileName) {
-        println("---------------------------------------------------------------------")
-        println(generatedCode)
+        log.info("---------------------------------------------------------------------")
+        log.info(generatedCode)
         def outFile = new File("${fullPath()}/${fileName}.java")
         outFile.append(generatedCode, StandardCharsets.UTF_8.toString())
     }
