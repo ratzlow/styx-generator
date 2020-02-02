@@ -17,7 +17,7 @@ class CodeGen {
     static void main(String[] args) {
         log.info("Start code generation ...")
         CodeGen gen = new CodeGen()
-        gen.start()
+        gen.generateSources()
         log.info("Finished generation. Look at ${gen.generateTarget}")
     }
 
@@ -31,7 +31,10 @@ class CodeGen {
 
     def dictNames = ["/FIX50.xml", "/DomainModel-FIX50.xml"]
 
-    def start() {
+    def fullPath() { "$generateTarget/" + packageName.toString().replace(".", "/") }
+
+
+    Set<String> generateSources() {
         def symbolTable = parseDictionaries(dictNames)
 
         log.info("Start writing files to $generateTarget ...")
@@ -39,8 +42,13 @@ class CodeGen {
         Symbol s_1 = symbolTable.get("Order") as Symbol
         Map<String, Generator> generators = [:]
         flatten(s_1, generators)
+
+        log.info("---------------------------------------------------------------------")
         generators.collect {it.value}.each {writeFile(it.generate(), it.fileName())}
+        log.info("---------------------------------------------------------------------")
         log.info("Finished code generation!")
+
+        generators.keySet()
     }
 
 
@@ -54,6 +62,8 @@ class CodeGen {
         for (String dictName : dictionaryNames) {
             log.info("Parsing dictionary $dictName ...")
             InputStream is = CodeGen.class.getResourceAsStream(dictName)
+            assert is != null : "No dict found with $dictName"
+
             def fix = new XmlParser().parse(is as InputStream)
 
             fix.fields.field
@@ -101,13 +111,10 @@ class CodeGen {
     }
 
     private void writeFile(String generatedCode, String fileName) {
-        log.info("---------------------------------------------------------------------")
         def fqFileName = "${fullPath()}/${fileName}.java"
         log.info("Write to File: $fqFileName")
         def outFile = new File(fqFileName)
         outFile.append(generatedCode, StandardCharsets.UTF_8.toString())
         log.debug(generatedCode)
     }
-
-    private String fullPath() { "$generateTarget/" + packageName.toString().replace(".", "/") }
 }

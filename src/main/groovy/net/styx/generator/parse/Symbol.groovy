@@ -18,7 +18,7 @@ abstract class Symbol {
     }
 
     def getAttributes() {
-        return attributes.collect { String attributeName -> symbolTable.get(attributeName) }
+        attributes.collect { String attributeName -> symbolTable.get(attributeName) }
     }
 
     boolean isCollectionItem() {

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fixMeta>
+    <!--
+        Enrichment of model structure defined in *FIXxx.xml
+    -->
+    <componentsMeta>
+        <componentMeta ref="Parties"
+                        longName="CounterParties"
+                        containerInterface="Set"
+                        containerImplementation="HashSet" />
+    </componentsMeta>
+
+
+    <fieldsMta>
+        <fieldMeta ref="ClOrdID" longName="ClientOrderID"/>
+        <fieldMeta ref="SettlDate" longName="SettlementDate"/>
+        <fieldMeta ref="HandlInst" longName="HandlingInstruction"/>
+        <fieldMeta ref="ExecInst" longName="ExecutionInstruction"/>
+        <fieldMeta ref="ExDestination" longName="ExchangeDestination"/>
+        <fieldMeta ref="TransactTime" longName="TransactionTime"/>
+    </fieldsMta>
+</fixMeta>
