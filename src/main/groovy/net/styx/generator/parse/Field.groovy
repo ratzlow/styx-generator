@@ -32,8 +32,8 @@ class Field extends Symbol {
     Collection<Literal> literals
     TypeResolver typeResolver
 
-    Field(Node node, Map symbolTable) {
-        super(node, symbolTable)
+    Field(Node node, Map symbolTable, Map<String, String> overrideAttrs) {
+        super(node, symbolTable, overrideAttrs)
         number = Integer.parseInt(node.attribute("number").toString())
         literals = node.children().collect { Node child -> new Literal(child) }
         String declaredType = node.attribute("type")

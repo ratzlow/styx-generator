@@ -3,18 +3,18 @@ package net.styx.generator.parse
 import groovy.util.logging.Slf4j
 
 @Slf4j
-class MetaDictParser {
+class MetaDict {
 
     def fixMeta
 
-    MetaDictParser(String classPathToXml) {
+    MetaDict(String classPathToXml) {
         log.info("Reading meta dictionary from classpath=$classPathToXml")
-        InputStream is = MetaDictParser.class.getResourceAsStream(classPathToXml)
+        InputStream is = MetaDict.class.getResourceAsStream(classPathToXml)
         fixMeta = new XmlParser().parse(is as InputStream)
     }
 
     /**
-     * Find meta data for FIX dictionary element referenced by "ref=???" attribute.
+     * Find in meta data for FIX dictionary depth first all elements with attribute 'ref' == supplied name
      *
      * @param refName ref attribute name to lookup corresponding attributes of element labeled with this ref=???
      * @return map of xml attributes in KV form

@@ -3,17 +3,17 @@ package net.styx.generator.parse
 
 class Component extends Symbol {
 
-    Component(Node node, Map symbolTable) {
-        super(node, symbolTable)
-        parse(node.children(), symbolTable)
+    Component(Node node, Map symbolTable, Closure<Map<String, String>> overrideAttrs) {
+        super(node, symbolTable, overrideAttrs(node))
+        parse(node.children(), symbolTable, overrideAttrs)
     }
 
-    def parse(Collection<Node> children, Map symbolTable) {
+    def parse(Collection<Node> children, Map symbolTable, Closure<Map<String, String>> overrideAttrs) {
         for (Node child : children) {
             def elemName = child.name()
             assert ["field", "component", "group"].contains(elemName)
             if (elemName == "group") {
-                new Group(child, symbolTable)
+                new Group(child, symbolTable, overrideAttrs(child))
             }
         }
     }

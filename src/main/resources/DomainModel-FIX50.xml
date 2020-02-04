@@ -37,6 +37,35 @@
             <component name="StrategyParametersGrp" required="N"/>
             <field name="ExDestinationIDSource" required="N"/>
         </message>
+
+        <message name="Fill" msgtype="OMS" msgcat="entity">
+            <field name="OrderID" required="Y"/>
+            <component name="Parties" required="N"/>
+            <field name="TradeOriginationDate" required="N"/>
+            <component name="ContraGrp" required="N"/>
+            <field name="ExecID" required="Y"/>
+            <field name="ExecType" required="Y"/>
+            <field name="LastQty" required="N"/>
+            <field name="AvgPx" required="N"/>
+            <field name="GTBookingInst" required="N"/>
+            <field name="TransactTime" required="N"/>
+            <field name="ReportToExch" required="N"/>
+            <component name="CommissionData" required="N"/>
+            <component name="SpreadOrBenchmarkCurveData" required="N"/>
+            <field name="AccruedInterestRate" required="N"/>
+            <field name="AccruedInterestAmt" required="N"/>
+            <field name="SettlCurrAmt" required="N"/>
+            <field name="SettlCurrency" required="N"/>
+            <field name="SettlCurrFxRate" required="N"/>
+            <field name="BookingType" required="N"/>
+            <field name="ExecPriceType" required="N"/>
+            <field name="ExecPriceAdjustment" required="N"/>
+            <field name="PriceImprovement" required="N"/>
+            <component name="MiscFeesGrp" required="N"/>
+            <component name="TrdRegTimestamps" required="N"/>
+            <field name="AggressorIndicator" required="N"/>
+            <field name="MatchType" required="N"/>
+        </message>
     </messages>
 
 </fix>

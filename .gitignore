@@ -25,7 +25,7 @@ hs_err_pid*
 # IntelliJ & project files/dirs
 .idea/
 .gradle/
-buildSrc/.gradle/
+buildSrc_org/.gradle/
 build/
 target/
 out/

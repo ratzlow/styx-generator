@@ -19,7 +19,7 @@ class GeneratorSpec extends Specification {
 
     def "parse meta FIX dictionary"() {
         given:
-        MetaDictParser parser = new MetaDictParser("/DomainModel-meta.xml")
+        MetaDict parser = new MetaDict("/DomainModel-meta.xml")
 
         expect:
         assert [ref               : "Parties", longName: "CounterParties",
