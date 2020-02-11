@@ -8,7 +8,11 @@
                        longName="CounterParties"
                        containerInterface="Set"
                        containerImplementation="HashSet" />
+
+        <componentMeta ref="GTBookingInst"
+                       longName="GoodTillBookingInstruction"/>
     </componentsMeta>
+
 
     <fieldsMeta>
         <fieldMeta ref="ClOrdID" longName="ClientOrderID"/>

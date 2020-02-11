@@ -2,6 +2,7 @@ package net.styx.generator
 
 import groovy.util.logging.Slf4j
 import net.styx.generator.parse.Component
+
 import net.styx.generator.parse.Field
 import net.styx.generator.parse.Message
 import net.styx.generator.parse.MetaDict
@@ -16,10 +17,8 @@ import java.nio.charset.StandardCharsets
 class CodeGen {
 
     static void main(String[] args) {
-        log.info("Start code generation ...")
         CodeGen gen = new CodeGen()
         gen.generateSources()
-        log.info("Finished generation. Look at ${gen.generateTarget}")
     }
 
     //---------------------------------------------------------------------------
@@ -35,23 +34,30 @@ class CodeGen {
      */
     def dictNames = ["/FIX50.xml", "/DomainModel-FIX50.xml"]
 
-    def dictDecorator = ["/DomainModel-meta.xml"]
+    /**
+     * List of meta dictionaries decorating #dictNames
+     */
+    def metaDictionaries = ["/DomainModel-meta.xml"]
 
     /**
      * List of classes to generate along with all the constituents.
      */
     def aggregateRoots = ["Order", "Fill"]
 
+    /**
+     * @return path in file system where classes were written to.
+     */
     def fullPath() { "$generateTarget/" + packageName.toString().replace(".", "/") }
 
-
+    /**
+     * Start generation process as instructed by given properties.
+     *
+     * @return names of classes that were generated
+     */
     Set<String> generateSources() {
-        // TODO: add support for parsing multiple metaDicts
-        MetaDict metaDict = new MetaDict(dictDecorator[0])
-        def symbolTable = parseDictionaries(dictNames, metaDict)
 
-        log.info("Start writing files to $generateTarget ...")
-        cleanDir()
+        def parser = new DictionaryParser()
+        Map<String, Symbol> symbolTable = parser.parseDictionaries(dictNames, metaDictionaries)
 
         log.info("Down select unique set of symbols to build object graphs starting at $aggregateRoots")
         Collection<Symbol> rootSymbols = symbolTable.findAll {aggregateRoots.contains(it.key)} collect { it.value }
@@ -60,7 +66,9 @@ class CodeGen {
         Map<String, Generator> generators = [:]
         distinct(rootSymbols, generators)
 
+        log.info("Start writing files to $generateTarget ...")
         log.info("---------------------------------------------------------------------")
+        cleanDir()
         generators.collect {it.value}.each {writeFile(it.generate(), it.fileName())}
         log.info("---------------------------------------------------------------------")
         log.info("Finished code generation! Wrote ${generators.size()} files to ${fullPath()}")
@@ -73,31 +81,6 @@ class CodeGen {
     // internal implementation
     //---------------------------------------------------------------------------
 
-    private Map<String, Symbol> parseDictionaries(List<String> dictionaryNames, MetaDict metaDict) {
-        Map<String, Symbol> symbolTable = [:]
-
-        for (String dictName : dictionaryNames) {
-            log.info("Parsing dictionary $dictName ...")
-            InputStream is = CodeGen.class.getResourceAsStream(dictName)
-            assert is != null : "No dict found with $dictName"
-
-            def fix = new XmlParser().parse(is as InputStream)
-            def overrideAttrs = { Node node -> metaDict.getMeta(node.attribute("name") as String)}
-
-            fix.fields.field
-                    .collect { Node node -> new Field(node, symbolTable, overrideAttrs(node)) }
-
-            fix.components.component
-                    .collect { Node node -> new Component(node, symbolTable, overrideAttrs) }
-
-            fix.messages.message
-                    .collect { Node node -> new Message(node, symbolTable, overrideAttrs(node)) }
-        }
-
-        symbolTable
-    }
-
-
     private void distinct(Collection<Symbol> symbols, Map<String, Generator> generators) {
         assert symbols != null
 
@@ -105,13 +88,14 @@ class CodeGen {
             if ( !generators.containsKey(symbol.name) ) {
                 def isEnum = symbol.type == "field" && !((Field) symbol).literals.isEmpty()
                 def isClass = symbol.type != "field"
+                def longName = symbol.longName()
                 if (isEnum) {
-                    generators.put(symbol.name, new EnumGen(packageName, symbol.name, symbol as Field))
+                    generators.put(symbol.name, new EnumGen(packageName, longName, symbol as Field))
                 } else if (isClass) {
-                    generators.put(symbol.name, new ClassGen(packageName, symbol.name, symbol.getAttributes()))
+                    generators.put(symbol.name, new ClassGen(packageName, longName, symbol.getAttributes()))
                 }
 
-                log.debug("Adding symbol $symbol.name")
+                log.debug("Adding symbol $longName")
 
                 assert symbol.attributes.every {it != null} : symbol
 
@@ -141,5 +125,38 @@ class CodeGen {
         def outFile = new File(fqFileName)
         outFile.append(generatedCode, StandardCharsets.UTF_8.toString())
         log.debug(generatedCode)
+    }
+}
+
+@Slf4j
+class DictionaryParser {
+
+
+    Map<String, Symbol> parseDictionaries(List<String> dictionaryNames, List<String> metaDictNames) {
+
+        // TODO: add support for parsing multiple metaDicts
+        MetaDict metaDict = new MetaDict(metaDictNames.get(0))
+
+        Map<String, Symbol> symbolTable = [:]
+
+        for (String dictName : dictionaryNames) {
+            log.info("Parsing dictionary $dictName ...")
+            InputStream is = DictionaryParser.class.getResourceAsStream(dictName)
+            assert is != null : "No dict found with $dictName"
+
+            def fix = new XmlParser().parse(is as InputStream)
+            def overrideAttrs = { Node node -> metaDict.getMeta(node.attribute("name") as String)}
+
+            fix.fields.field
+                    .collect { Node node -> new Field(node, symbolTable, overrideAttrs(node)) }
+
+            fix.components.component
+                    .collect { Node node -> new Component(node, symbolTable, overrideAttrs) }
+
+            fix.messages.message
+                    .collect { Node node -> new Message(node, symbolTable, overrideAttrs(node)) }
+        }
+
+        symbolTable
     }
 }

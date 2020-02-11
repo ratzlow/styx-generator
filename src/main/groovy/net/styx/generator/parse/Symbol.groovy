@@ -4,18 +4,16 @@ import groovy.util.logging.Slf4j
 
 @Slf4j
 abstract class Symbol {
-    String name, attributeName
-    def type, javaType
+    String name
+    def type
     def symbolTable = [:]
     def attributes = []
-    Map<String, String> overrideAttrs;
+    Map<String, String> overrideAttrs
 
 
     Symbol(Node node, symbolTable, Map<String, String> overrideAttrs) {
         this.type = node.name()
         this.name = node.attribute("name")
-        this.attributeName = name.substring(0,1).toLowerCase() + name.substring(1)
-        this.javaType = name
         this.symbolTable = symbolTable
         this.attributes = node.children().collect { Node child -> child.attribute("name") }.findAll {it != null}
         this.symbolTable.put(name, this)
@@ -29,6 +27,18 @@ abstract class Symbol {
 
     boolean isCollectionItem() {
         false
+    }
+
+    String longName() {
+        overrideAttrs.containsKey("longName") ? overrideAttrs["longName"] : name
+    }
+
+    String attributeName() {
+        longName().substring(0,1).toLowerCase() + longName().substring(1)
+    }
+
+    String javaType() {
+        longName()
     }
 
     @Override

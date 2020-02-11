@@ -38,7 +38,6 @@ class Field extends Symbol {
         literals = node.children().collect { Node child -> new Literal(child) }
         String declaredType = node.attribute("type")
         typeResolver = types.find(declaredType)
-        javaType = !literals.empty ? name : typeResolver.targetType
         assert attributes.every {it != null} : name
     }
 
@@ -49,6 +48,10 @@ class Field extends Symbol {
         "${name}{type=$type" + (!literals.isEmpty() ? " literals=${literals}}" : "}")
     }
 
+    @Override
+    String javaType() {
+        !literals.empty ? longName() : typeResolver.targetType
+    }
 
     //------------------------------------------------------------------------------------------------------------------
     // inner classes to associate types with Fields

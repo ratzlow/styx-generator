@@ -44,12 +44,12 @@ ${gettersAndSetters()}
 //------------------------------Template:get/set methods----------
             """
     
-    public ${resolveJavaType(attribute)} get$attribute.name() {
-        return $attribute.attributeName;
+    public ${resolveJavaType(attribute)} get${attribute.longName()}() {
+        return ${attribute.attributeName()};
     }
     
-    public void set$attribute.name(${resolveJavaType(attribute)} $attribute.attributeName) {
-        this.$attribute.attributeName = $attribute.attributeName;
+    public void set${attribute.longName()}(${resolveJavaType(attribute)} ${attribute.attributeName()}) {
+        this.${attribute.attributeName()} = ${attribute.attributeName()};
     }
 """
 //----------------------------------------------------------------
@@ -77,12 +77,12 @@ ${gettersAndSetters()}
         for (Symbol attribute : attributes) {
             def javaType = resolveJavaType(attribute)
             def assignment = attribute.isCollectionItem() ? " = new ArrayList<>()" : ""
-            declarations << "    private $javaType ${attribute.attributeName}${assignment};\n"
+            declarations << "    private $javaType ${attribute.attributeName()}${assignment};\n"
         }
         declarations.join()
     }
 
     private String resolveJavaType(Symbol attribute) {
-        attribute.isCollectionItem() ? "Collection<$attribute.name>" : attribute.javaType
+        attribute.isCollectionItem() ? "Collection<${attribute.longName()}>" : attribute.javaType()
     }
 }

@@ -51,7 +51,6 @@
             <field name="TransactTime" required="N"/>
             <field name="ReportToExch" required="N"/>
             <component name="CommissionData" required="N"/>
-            <component name="SpreadOrBenchmarkCurveData" required="N"/>
             <field name="AccruedInterestRate" required="N"/>
             <field name="AccruedInterestAmt" required="N"/>
             <field name="SettlCurrAmt" required="N"/>
